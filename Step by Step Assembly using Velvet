@@ -1,3 +1,8 @@
+#Assembly of the genes of two plasmids in E.coli O104:H4 Strain 280
+#This is the script with the commands used in Unix for the analysis
+#The four fasta files used in this analysis contain two pair-end reads from a MiSeq run, and two pair-end reads 
+#from a Mate-Pair library. 
+
 module load velvet
 mkdir exam
 cd exam
@@ -8,16 +13,24 @@ velveth allkmers 21,111,2 -shortPaired -fastq -separate \
 /data/exam/assembly/Sample280_1.fastq \
 /data/exam/assembly/Sample280_2.fastq \
 
+#allkmers is just an example of filename.
+#When adding 21,111,2 velvet will make an index for each k-mer between 21 and 111, but only for every 2nd number. This to 
+#avoid palindrome errors by using only uneven numbers for k-mer
+
 velvetg allkmers_21 
 velvetg allkmers_23 
 ...
 velvetg allkmers_111
+
+#Run velvetg for each of the indexes. Plot the N50 vs. k-mer used to find optimal k-mer.
 
 velveth asm1 75 -shortPaired -fastq -separate \
 /data/exam/assembly/Sample280_1.fastq \
 /data/exam/assembly/Sample280_2.fastq \
 
 velvetg asm1 -exp_cov auto -cov_cutoff auto
+
+#optimal k-mer was found to be 75 for paired-end sequences only
 
 velveth allkmers 21,49,2 -shortPaired -fastq -separate \
 /data/exam/assembly/Sample280_1.fastq \
@@ -26,10 +39,16 @@ velveth allkmers 21,49,2 -shortPaired -fastq -separate \
 /data/exam/assembly/TY2482_6kb_1_50x_RC.fq \
 /data/exam/assembly/TY2482_6kb_2_50x_RC.f \
 
+#The process is repeated, but with the Mate Pair reads. Note that the highest possible k-mer is 49, since the read length
+#of the Mate Pair reads is 49. 
+
 velvetg allkmers_21 -shortMatePaired2 yes
 velvetg allkmers_23 -shortMatePaired2 yes
 ...
 velvetg allkmers_49 -shortMatePaired2 yes
+
+#Plot K-mer vs. N50 to find optimal k-mer, like previously. However, results changed when adding -exp_cov and -cov_cutoff 
+#to the velvetg command. Without cutoffs, optimal k-mer was 49. When using cutoffs, optimal k-mer was 45.
 
 velveth asm2 45 -shortPaired -fastq -separate \
 /data/exam/assembly/Sample280_1.fastq \
@@ -39,9 +58,12 @@ velveth asm2 45 -shortPaired -fastq -separate \
 /data/exam/assembly/TY2482_6kb_2_50x_RC.f \
 
 velvetg asm2 -exp_cov auto -cov_cutoff auto -shortMatePaired2 yes
-Final graph has 1047 nodes and n50 of 2876052, max 2876052, total 5503353, using 5679106/6870498 reads
-Median coverage depth = 17.904855 
 
+#Final graph has 1047 nodes and n50 of 2876052, max 2876052, total 5503353, using 5679106/6870498 reads
+#Median coverage depth = 17.904855 
+#asm2 is the assembly used from now on
+
+#Time to map the assembly
 module load python2
 module load samtools
 module load bwa
@@ -66,10 +88,13 @@ bwa mem -t 2 ../contigs.fa \
 samtools index map_pe.sorted.bam
 samtools index map_mp.sorted.bam
 
-
+#For improved assembly, REAPR can evaluate the accuracy of the genome
 cd asm2
 module load reapr
 
 reapr pipeline contigs.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1 
 
 zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm2.03.score.errors_nospaces.gff 
+
+#map_pe.sorted.bam,map_mp.sorted.bam,asm2.03.score.errors_nospaces.gff and scaffoldgap2bed.py can be added to IGV two browse 
+#the assembly, with contigs.fa as the reference genome.   
