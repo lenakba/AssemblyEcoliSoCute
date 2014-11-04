@@ -1,0 +1,37 @@
+
+
+spades.py -t 2 -k 21,29,37,43 --careful --pe1-1 \
+/data/exam/assembly/Sample280_1.fastq --pe1-2 \
+/data/exam/assembly/Sample280_2.fastq --mp1-1 \
+/data/exam/assembly/TY2482_6kb_1_50x_RC.fq --mp1-2 \ 
+/data/exam/assembly/TY2482_6kb_2_50x_RC.fq --mp1-fr -o asm3
+
+module load python2
+module load samtools
+module load bwa
+
+cd asm3
+
+bwa index -a bwtsw contigs.fasta
+
+mkdir bwa
+cd bwa
+
+bwa mem -t 2 ../contigs.fasta \
+/data/exam/assembly/Sample280_1.fastq \
+/data/exam/assembly/Sample280_2.fastq \
+| samtools view -buS - | samtools sort - map_pe.sorted 
+
+bwa mem -t 2 ../contigs.fasta \
+/data/exam/assembly/TY2482_6kb_1_50x_RC.fq \ 
+/data/exam/assembly/TY2482_6kb_2_50x_RC.fq \
+| samtools view -buS - | samtools sort – map_mp.sorted
+
+samtools index map_pe.sorted.bam
+samtools index map_mp.sorted.bam
+
+cd asm3
+
+reapr pipeline contigs.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1 
+
+zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm3.03.score.errors_nospaces.gff
