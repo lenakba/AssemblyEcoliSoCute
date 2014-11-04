@@ -1,0 +1,14 @@
+velveth allkmers 21,111,2 -shortPaired -fastq -separate \
+/data/exam/assembly/Sample280_1.fastq \
+/data/exam/assembly/Sample280_2.fastq \
+
+velvetg allkmers_21 
+velvetg allkmers_23 
+...
+velvetg allkmers_111
+
+velveth asm1 75 -shortPaired -fastq -separate \
+/data/exam/assembly/Sample280_1.fastq \
+/data/exam/assembly/Sample280_2.fastq \
+
+velvetg asm1 -exp_cov auto -cov_cutoff auto
