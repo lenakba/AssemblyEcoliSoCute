@@ -1,3 +1,9 @@
+module load velvet
+mkdir exam
+cd exam
+mkdir velvet
+cd velvet
+
 velveth allkmers 21,111,2 -shortPaired -fastq -separate \
 /data/exam/assembly/Sample280_1.fastq \
 /data/exam/assembly/Sample280_2.fastq \
@@ -12,3 +18,58 @@ velveth asm1 75 -shortPaired -fastq -separate \
 /data/exam/assembly/Sample280_2.fastq \
 
 velvetg asm1 -exp_cov auto -cov_cutoff auto
+
+velveth allkmers 21,49,2 -shortPaired -fastq -separate \
+/data/exam/assembly/Sample280_1.fastq \
+/data/exam/assembly/Sample280_2.fastq \
+-shortPaired2 -separate -fastq \
+/data/exam/assembly/TY2482_6kb_1_50x_RC.fq \
+/data/exam/assembly/TY2482_6kb_2_50x_RC.f \
+
+velvetg allkmers_21 -shortMatePaired2 yes
+velvetg allkmers_23 -shortMatePaired2 yes
+...
+velvetg allkmers_49 -shortMatePaired2 yes
+
+velveth asm2 45 -shortPaired -fastq -separate \
+/data/exam/assembly/Sample280_1.fastq \
+/data/exam/assembly/Sample280_2.fastq \
+-shortPaired2 -separate -fastq \
+/data/exam/assembly/TY2482_6kb_1_50x_RC.fq \
+/data/exam/assembly/TY2482_6kb_2_50x_RC.f \
+
+velvetg asm2 -exp_cov auto -cov_cutoff auto -shortMatePaired2 yes
+Final graph has 1047 nodes and n50 of 2876052, max 2876052, total 5503353, using 5679106/6870498 reads
+Median coverage depth = 17.904855 
+
+module load python2
+module load samtools
+module load bwa
+
+cd asm2
+
+bwa index -a bwtsw contigs.fasta
+
+mkdir bwa
+cd bwa
+
+bwa mem -t 2 ../contigs.fa \
+/data/exam/assembly/Sample280_1.fastq \
+/data/exam/assembly/Sample280_2.fastq \
+| samtools view -buS - | samtools sort - map_pe.sorted 
+
+bwa mem -t 2 ../contigs.fa \
+/data/exam/assembly/TY2482_6kb_1_50x_RC.fq \ 
+/data/exam/assembly/TY2482_6kb_2_50x_RC.fq \
+| samtools view -buS - | samtools sort – map_mp.sorted
+
+samtools index map_pe.sorted.bam
+samtools index map_mp.sorted.bam
+
+
+cd asm2
+module load reapr
+
+reapr pipeline contigs.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1 
+
+zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm2.03.score.errors_nospaces.gff 
