@@ -1,5 +1,15 @@
+#Assembly of the genes of two plasmids in E.coli O104:H4 Strain 280
+#This is the script with the commands used in Unix for the analysis
+#The four fasta files used in this analysis contain two pair-end reads from a MiSeq run, and two pair-end reads 
+#from a Mate-Pair library.
 
+#Logged into course server
+mkdir exam
+cd exam
+mkdir spades
+cd spades
 
+screen
 spades.py -t 2 -k 21,29,37,43 --careful --pe1-1 \
 /data/exam/assembly/Sample280_1.fastq --pe1-2 \
 /data/exam/assembly/Sample280_2.fastq --mp1-1 \
