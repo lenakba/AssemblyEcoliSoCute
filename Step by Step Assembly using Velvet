@@ -70,11 +70,13 @@ module load bwa
 
 cd asm2
 
+#Create an index for BWA first
 bwa index -a bwtsw contigs.fasta
 
 mkdir bwa
 cd bwa
 
+#Map the reads for Paired Ends, then Mate Pairs
 bwa mem -t 2 ../contigs.fa \
 /data/exam/assembly/Sample280_1.fastq \
 /data/exam/assembly/Sample280_2.fastq \
@@ -85,8 +87,11 @@ bwa mem -t 2 ../contigs.fa \
 /data/exam/assembly/TY2482_6kb_2_50x_RC.fq \
 | samtools view -buS - | samtools sort – map_mp.sorted
 
+#Create an index for the bam files
 samtools index map_pe.sorted.bam
 samtools index map_mp.sorted.bam
+#The bam files can be added to IGV now. Make sure to have the .bam.bai files in the same folder as .bam files.
+
 
 #For improved assembly, REAPR can evaluate the accuracy of the genome
 cd asm2
@@ -96,5 +101,5 @@ reapr pipeline contigs.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1
 
 zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm2.03.score.errors_nospaces.gff 
 
-#map_pe.sorted.bam,map_mp.sorted.bam,asm2.03.score.errors_nospaces.gff and scaffoldgap2bed.py can be added to IGV two browse 
+#map_pe.sorted.bam,map_mp.sorted.bam,asm2.03.score.errors_nospaces.gff and gaps.bed can be added to IGV to browse 
 #the assembly, with contigs.fa as the reference genome.   
