@@ -22,17 +22,17 @@ module load bwa
 
 cd asm3
 
-bwa index -a bwtsw contigs.fasta
+bwa index -a bwtsw scaffolds.fasta
 
 mkdir bwa
 cd bwa
 
-bwa mem -t 2 ../contigs.fasta \
+bwa mem -t 2 ../scaffolds.fasta \
 /data/exam/assembly/Sample280_1.fastq \
 /data/exam/assembly/Sample280_2.fastq \
 | samtools view -buS - | samtools sort - map_pe.sorted 
 
-bwa mem -t 2 ../contigs.fasta \
+bwa mem -t 2 ../scaffolds.fasta \
 /data/exam/assembly/TY2482_6kb_1_50x_RC.fq \ 
 /data/exam/assembly/TY2482_6kb_2_50x_RC.fq \
 | samtools view -buS - | samtools sort – map_mp.sorted
@@ -40,8 +40,11 @@ bwa mem -t 2 ../contigs.fasta \
 samtools index map_pe.sorted.bam
 samtools index map_mp.sorted.bam
 
+cd bwa
+scaffoldgap2bed.py -i ../scaffolds.fasta -m 10 >asm3gaps.bed
+
 cd asm3
 
-reapr pipeline contigs.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1 
+reapr pipeline scaffolds.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1 
 
 zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm3.03.score.errors_nospaces.gff
