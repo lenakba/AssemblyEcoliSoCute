@@ -48,3 +48,6 @@ cd asm3
 reapr pipeline scaffolds.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1 
 
 zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm3.03.score.errors_nospaces.gff
+
+#map_pe.sorted.bam,map_mp.sorted.bam,asm3.03.score.errors_nospaces.gff and asm3gaps.bed can be added to IGV to browse 
+#the assembly, with scaffods.fasta as the reference genome. 
