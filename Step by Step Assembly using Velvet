@@ -92,6 +92,9 @@ samtools index map_pe.sorted.bam
 samtools index map_mp.sorted.bam
 #The bam files can be added to IGV now. Make sure to have the .bam.bai files in the same folder as .bam files.
 
+cd bwa
+scaffoldgap2bed.py -i ../contigs.fa -m 10 >asm2gaps.bed
+
 
 #For improved assembly, REAPR can evaluate the accuracy of the genome
 cd asm2
@@ -101,5 +104,5 @@ reapr pipeline contigs.fasta bwa/map_mp.sorted.bam reapr_out >reapr.out 2>&1
 
 zcat 03.score.errors.gff.gz |sed 's/ /_/g' >asm2.03.score.errors_nospaces.gff 
 
-#map_pe.sorted.bam,map_mp.sorted.bam,asm2.03.score.errors_nospaces.gff and gaps.bed can be added to IGV to browse 
+#map_pe.sorted.bam,map_mp.sorted.bam,asm2.03.score.errors_nospaces.gff and asm2gaps.bed can be added to IGV to browse 
 #the assembly, with contigs.fa as the reference genome.   
